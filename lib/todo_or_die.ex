@@ -3,16 +3,30 @@ defmodule TodoOrDie do
   Documentation for `TodoOrDie`.
   """
 
-  @doc """
-  Hello world.
+  defmacro after_date!(year, month, day) do
+    quote do
+      Module.register_attribute(__MODULE__, :todo_checks, accumulate: true)
 
-  ## Examples
+      Module.put_attribute(
+        __MODULE__,
+        :todo_checks,
+        {:date, DateTime.new!(Date.new!(unquote(year), unquote(month), unquote(day)), ~T[00:00:00])}
+      )
 
-      iex> TodoOrDie.hello()
-      :world
+      Module.put_attribute(__MODULE__, :before_compile, unquote(__MODULE__))
+    end
+  end
 
-  """
-  def hello do
-    :world
+  defmacro __before_compile__(_env) do
+    quote do
+      for check <- @todo_checks do
+        IO.puts("inspecting a todo check")
+
+        case check do
+          {:date, date} ->
+            if DateTime.compare(DateTime.utc_now(), date) == :gt, do: raise("It's after #{date}!")
+        end
+      end
+    end
   end
 end
