@@ -30,6 +30,7 @@ defmodule MyHappyModule do
   require TodoOroDie
 
   TodoOrDie.after_date!(1999, 12, 31)
+end
 ```
 
 ## Maintainer
